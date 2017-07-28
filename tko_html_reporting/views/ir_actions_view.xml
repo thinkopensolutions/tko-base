@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id='act_report_xml_view' model='ir.ui.view'>
+        <field name="name">ir.actions.report.xml</field>
+        <field name="model">ir.actions.report.xml</field>
+        <field name="inherit_id" ref="base.act_report_xml_view" />
+        <field name="arch" type="xml">
+            <field name="report_type" position="after">
+                <field name="template_id"
+                       attrs="{'required' : [('report_type','=','html-pdf')],'invisible' : [('report_type','!=','html-pdf')]}"
+                       options="{'no_create': True}"/>
+            </field>
+        </field>
+    </record>
+</odoo>
