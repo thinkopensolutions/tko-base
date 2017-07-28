@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id='html_report_template_form' model='ir.ui.view'>
+        <field name="name">Html Report Template</field>
+        <field name="model">html.report.template</field>
+        <field name="arch" type="xml">
+
+            <form string="HTML Report Template">
+                <header>
+                    <button name="create_report" attrs="{'invisible': [('report_id','!=',False)]}"
+                            string="Create Report" type="object" class="oe_highlight"/>
+                </header>
+                <group>
+                    <field name="name"/>
+                    <field name="report_name"/>
+                    <field name="model_id"/>
+                    <field name="report_id"/>
+                </group>
+                <notebook>
+                    <page string="Template" name="template">
+                        <field name="report_body"/>
+                    </page>
+                    <page string="Header/Footer" name="header_footer">
+                        <separator string="Header" name="header"/>
+                        <field name="report_header"/>
+                        <separator string="Footer" name="footer"/>
+                        <field name="report_footer"/>
+                    </page>
+                    <page string="CSS" name="css">
+                        <field name="report_css"/>
+                    </page>
+                    <page string="Help" name="help">
+                        <group col="4">
+                            <div class="oe_grey">
+                                You can access any related field with dot (.) starting with the field in current object:
+                                <br/>
+                                <b>Method 1</b>
+                                <br/>
+                                Partner, for example:
+                                <ul>
+                                    <li>Cliente: $(partner_id.name)s</li>
+                                    <li>Número: $(partner_id.email)s</li>
+                                    <li>Group: $(partner_id.phone)s</li>
+                                </ul>
+                                <br/>
+                                Contato, for example:
+                                <ul>
+                                    <li>Name: $(contato_id.name)s</li>
+                                    <li>Phone: $(contato_id.email)s</li>
+                                </ul>
+                                <br/>
+                                
+                            </div>
+                            <div class="oe_grey">
+
+                                For images <strong>you can set width and height</strong> as $(ImageField,width,height)s.
+                                Example:
+                                <br/>$(autor_id.image,160,160)s
+                                You can also add a style type="text/css" to add CSS style rules to the document.
+                            </div>
+                            <div class="oe_grey">
+                                <br/>
+                                <b>Python Expressions</b>
+                                <ul>
+                                    ${time.strftime("%d de %B de %Y").decode("utf-8")}s
+                                    <li>
+                                        <b>Note:</b>
+                                        For python expression we use ${}s not $()s
+                                    </li>
+                                </ul>
+                                <b>Python Functions [Must be defined in the object]</b>
+                                <ul>
+                                    <li>${report_current_datetime()}s</li>
+                                    <li>${report_current_date()}s</li>
+                                </ul>
+                                <b>Python If Condition</b>
+                                <br/>
+                                <b>Method 1</b>
+                                <br/>
+                                <ul>
+                                    <li>Condition: ${'true' if True else 'false'}s</li>
+                                    <li>clausula: ${", bem como" + object.clausula if object.clausula else "."}s</li>
+                                    <li>type: ${"Juizado Especial" if object.type == "JEC" else "Vara"}s</li>
+                                    <li>
+                                        Multa:${"." if not object.multa_id else ", sob pena de multa de 10% (dez por cento) do valor acordado."}s
+                                    </li>
+                                </ul>
+                                <b>Method 2</b>
+                                <br/>
+                                <ul>
+                                    <li>type: ${object.type == "JEC" and "Juizado Especial" or "Vara"}s</li>
+                                    <li>CPF: ${o.cpf and o.cpf or "Not Found"}s</li>
+                                </ul>
+
+                            </div>
+
+                        </group>
+                    </page>
+                </notebook>
+            </form>
+        </field>
+    </record>
+    <record id='html_report_template_tree' model='ir.ui.view'>
+        <field name="name">Html Report Template</field>
+        <field name="model">html.report.template</field>
+        <field name="arch" type="xml">
+            <tree string="HTML Report Template">
+                <field name="name"/>
+                <field name="report_name"/>
+            </tree>
+        </field>
+    </record>
+    <record id="html_report_template_action" model="ir.actions.act_window">
+        <field name="name">Html Report Template</field>
+        <field name="res_model">html.report.template</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="html_report_template_tree"/>
+    </record>
+    <menuitem action="html_report_template_action" id="html_report_template_menu" parent="base.next_id_6"/>
+</odoo>

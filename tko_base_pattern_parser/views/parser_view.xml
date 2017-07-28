@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="pattern_config_form" model="ir.ui.view">
+        <field name="name">Pattern</field>
+        <field name="model">pattern.config</field>
+        <field name="arch" type="xml">
+            <form string="Pattern Parser">
+                <sheet>
+                    <group>
+                        <field name="name" required="1"/>
+                        <field name="pattern_type" widget="radio" required="1"/>
+                        <field name="prefix"
+                               attrs="{'required':[('pattern_type','!=','r')],'invisible': [('pattern_type','=','r')] }"/>
+                        <field name="suffix"
+                               attrs="{'invisible':[('pattern_type','in',['fi','r'])], 'required' :[('pattern_type','=','v')]}"/>
+                        <field name="pattern"
+                               attrs="{'invisible':[('pattern_type','=','v')], 'required' :[('pattern_type','!=','v')]}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="pattern_config_tree" model="ir.ui.view">
+        <field name="name">Pattern</field>
+        <field name="model">pattern.config</field>
+        <field name="arch" type="xml">
+            <tree string="Pattern Parser">
+                <field name="name" required="1"/>
+                <field name="pattern_type" widget="radio" required="1"/>
+                <field name="prefix"
+                       attrs="{'required':[('pattern_type','!=','r')],'invisible': [('pattern_type','=','r')] }"/>
+                <field name="suffix"
+                       attrs="{'invisible':[('pattern_type','in',['v','r'])], 'required' :[('pattern_type','=','fi')]}"/>
+                <field name="pattern"
+                       attrs="{'invisible':[('pattern_type','=','v')], 'required' :[('pattern_type','!=','v')]}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="pattern_config_action" model="ir.actions.act_window">
+        <field name="name">Patterns</field>
+        <field name="res_model">pattern.config</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="pattern_config_tree"/>
+    </record>
+
+    <menuitem id="pattern_config_menu" parent="base.menu_custom" sequence="20"
+              action="pattern_config_action"/>
+
+    <!-- Pattern Parser -->
+
+    <record id="pattern_parser_form" model="ir.ui.view">
+        <field name="name">Pattern Parser</field>
+        <field name="model">pattern.parser.agent</field>
+        <field name="arch" type="xml">
+            <form string="Pattern Parser">
+                <header>
+                    <button name="set_publish" states="d" string="Publish" type="object" class="oe_highlight"/>
+                    <button name="set_draft" states="p" string="Draft" type="object" class="oe_highlight"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="pattern_id"/>
+                        <field name="model_id" options="{'no_create': True}"/>
+                        <field name="model_id_model" invisible="1"/>
+                        <field name="feature_field_id"
+                               domain="[('model','=',model_id_model),('ttype','in',['char','text'])]"
+                               options="{'no_create': True}"/>
+                        <field name="label_field_id"
+                               domain="[('model','=',model_id_model),('ttype','in',['char','text','many2one','many2many'])]"
+                               options="{'no_create': True}"/>
+                        <field name="server_action_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="pattern_parser_tree" model="ir.ui.view">
+        <field name="name">Pattern Parser</field>
+        <field name="model">pattern.parser.agent</field>
+        <field name="arch" type="xml">
+            <tree string="Pattern Parser">
+                <field name="name"/>
+                <field name="pattern_id"/>
+                <field name="model_id"/>
+                <field name="feature_field_id"/>
+                <field name="model_id"/>
+                <field name="label_field_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="pattern_parser_action" model="ir.actions.act_window">
+        <field name="name">Pattern Parser</field>
+        <field name="res_model">pattern.parser.agent</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="pattern_parser_tree"/>
+    </record>
+
+    <!--Pattern Config-->
+
+    <menuitem id="pattern_parser_sub_menu" parent="base.menu_custom"
+              action="pattern_parser_action" sequence="10"/>
+
+
+</odoo>

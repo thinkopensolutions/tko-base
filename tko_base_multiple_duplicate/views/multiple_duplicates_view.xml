@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- vim:fdn=3:
+-->
+<odoo>
+    <template id="assets_backend" name="share assets" inherit_id="web.assets_backend">
+        <xpath expr="." position="inside">
+            <script type="text/javascript"
+                    src="/tko_base_multiple_duplicate/static/src/js/multiple_duplicates.js"></script>
+        </xpath>
+    </template>
+</odoo>

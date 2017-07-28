@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Multiple Duplicates Wizard -->
+        <record id="multiple_duplicates_form" model="ir.ui.view">
+            <field name="name">Multiple Duplicates</field>
+            <field name="model">multiple.duplicates</field>
+            <field name="inherit_id" ref="tko_base_multiple_duplicate.multiple_duplicates_form"/>
+            <field name="arch" type="xml">
+                <group name="group_name" position="after">
+                    <group name="group_name2" invisible="not context.get('active_model',False)=='account.invoice'"
+                           class="oe_inline">
+                        <label for="interval" invisible="not context.get('active_model',False)=='account.invoice'"/>
+                        <div>
+                            <field name="interval" class="oe_inline" nolabel="1"/>
+                            <field name="interval_unit" class="oe_inline" nolabel="1"/>
+                        </div>
+                    </group>
+                </group>
+            </field>
+        </record>
+    </data>
+</odoo>

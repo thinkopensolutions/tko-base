@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Multiple Duplicates Wizard -->
+        <record id="multiple_duplicates_form" model="ir.ui.view">
+            <field name="name">Multiple Duplicates</field>
+            <field name="model">multiple.duplicates</field>
+            <field name="arch" type="xml">
+                <form string="Contract Template">
+                    <group name="group_name">
+                        <label for="name"/>
+                        <div>
+                            <field name="name" class="oe_inline"/>
+                            <label string="Times" class="oe_inline"/>
+                        </div>
+                    </group>
+                    <footer>
+                        <button name="duplicate_records" string="Duplicate"
+                                type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link"
+                                special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="multiple_duplicates_action" model="ir.actions.act_window">
+            <field name="name">Multiple Duplicates</field>
+            <field name="res_model">multiple.duplicates</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</odoo>
