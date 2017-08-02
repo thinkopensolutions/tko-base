@@ -72,9 +72,10 @@ class PatternParserAgent(models.Model):
         pattern_type = self.pattern_id.pattern_type
         for record in records:
             # Read Text
-            text = getattr(record, self.feature_field_id.name).encode('utf-8')
+            text = getattr(record, self.feature_field_id.name)
             # Parse text based on pattern
             if text:
+                text = text.encode('utf-8')
                 value = ''
                 # If it pattern is regular expression
                 pattern = self.pattern_id.pattern

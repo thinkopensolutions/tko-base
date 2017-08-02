@@ -40,8 +40,10 @@ class IrActionsServer(models.Model):
                 # call the single method related to the action: run_action_<STATE>
                 func = getattr(run_self, 'run_action_%s' % action.state)
                 res = func(action, eval_context=eval_context)
-            else:
-                return super(IrActionsServer, self).run()
+            # This line makes Galalai and Parser compatible
+            # we don't want to call super in case of Galalai and Parser
+            if action.state not in ['parser', 'predict']:
+                return super(IrActionsServer, action).run()
         return res
 
     @api.model
