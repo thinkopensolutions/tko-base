@@ -6,6 +6,12 @@
             <field name="model">ir.actions.server</field>
             <field name="inherit_id" ref="base.view_server_action_form"/>
             <field name="arch" type="xml">
+                 <xpath expr="//tree//field[@name='value']" position="before">
+                    <field name="dynamic_selection_id"/>
+                </xpath>
+                <xpath expr="//field[@name='fields_lines']//form//field[@name='value']" position="before">
+                    <field name="dynamic_selection_id"/>
+                </xpath>
                 <xpath expr="//page[5]" position="attributes">
                     <attribute name="attrs">{'invisible': [('state', 'not in', ['multi','multi_mass'])]}</attribute>
                 </xpath>
@@ -20,14 +26,5 @@
             </field>
         </record>
 
-        <!--
-        <page string="Execute several actions" autofocus="autofocus" attrs="{'invisible': [('state', '!=', 'multi')]}">
-                                <p class="oe_grey">
-                                    If several child actions return an action, only the last one will be executed.
-                                    This may happen when having server actions executing code that returns an action, or server actions returning a client action.
-                                </p>
-                                <field name="child_ids" domain="[('model_id', '=', model_id)]"/>
-                            </page>
-        -->
     </data>
 </odoo>
