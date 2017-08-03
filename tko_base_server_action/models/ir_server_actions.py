@@ -142,3 +142,39 @@ class IrActionsServer(models.Model):
                 if not result:
                     return False
         return super(IrActionsServer, self).run()
+
+class DynamicSelection(models.Model):
+    _name = 'dynamic.selection'
+
+    name = fields.Char('Name')
+    record_id = fields.Integer("Record ID")
+
+class IrServerObjectLines(models.Model):
+    _inherit = 'ir.server.object.lines'
+
+    dynamic_selection_id = fields.Many2one('dynamic.selection', string='Dynamic Selection')
+
+    @api.onchange('col1')
+    def onchange_col1(self):
+        dynamic_obj = self.env['dynamic.selection']
+
+        col1 = self.col1
+        value = self.value
+        if self.col1:
+            if self.col1.relation:
+                records = self.env[self.col1.relation].search([])
+            if self.col1.ttype in ['many2one', 'many2many']:
+                dynamic_obj.search([]).unlink()
+                for record in records:
+                    dynamic_obj.create({'name' : record.name,
+                                        'record_id': record.id})
+        self.col1 = col1
+        self.value = value
+
+
+    @api.onchange('dynamic_selection_id')
+    def onchange_dynamic_selection(self):
+        if self.dynamic_selection_id:
+            self.value = self.dynamic_selection_id.record_id
+
+
