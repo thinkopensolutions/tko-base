@@ -2,9 +2,10 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
-    'name': 'Server Action User Filter',
+    'name': 'TKO Server Action',
     'summary': '',
-    'description': 'Allows to add user defined filters in server action.',
+    'description': 'Allows to add user defined filters in server action.'
+                   'Execute multiple server action in mass',
     'author': 'TKO',
     'category': 'Extra Tools',
     'license': 'AGPL-3',
