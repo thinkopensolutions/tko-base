@@ -142,6 +142,8 @@ class IrActionsServer(models.Model):
                 result = record.validate_server_action()
                 if result:
                     res = super(IrActionsServer, record).run()
+            else:
+                super(IrActionsServer, record).run()
         return res
        # return super(IrActionsServer, self).run()
 
