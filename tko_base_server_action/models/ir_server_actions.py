@@ -136,12 +136,14 @@ class IrActionsServer(models.Model):
     # if filter is set, execute server action only if condition is satisfied
     @api.multi
     def run(self):
+        res = False
         for record in self:
             if record.filter_id.domain:
                 result = record.validate_server_action()
-                if not result:
-                    return False
-        return super(IrActionsServer, self).run()
+                if result:
+                    res = super(IrActionsServer, record).run()
+        return res
+       # return super(IrActionsServer, self).run()
 
 class DynamicSelection(models.Model):
     _name = 'dynamic.selection'
