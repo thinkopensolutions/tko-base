@@ -4,8 +4,9 @@
 {
     'name': 'TKO Server Action',
     'summary': '',
-    'description': 'Allows to add user defined filters in server action.'
-                   'Execute multiple server action in mass',
+    'description': 'Allows to add user defined filters in server action. \n'
+                   'Execute multiple server action in mass \n'
+                   'Value mapping in server action lines \n',
     'author': 'TKO',
     'category': 'Extra Tools',
     'license': 'AGPL-3',
@@ -26,6 +27,7 @@
     'css': [],
     'demo_xml': [],
     'data': [
+            'security/ir.model.access.csv',
              'views/ir_server_actions_view.xml',
     ],
 }
