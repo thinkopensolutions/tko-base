@@ -148,7 +148,7 @@ class IrActionsServer(models.Model):
                 if result:
                     res = super(IrActionsServer, action).run()
                 else:
-                    _logger.info("Skipped execution of server action %s for %s with filter, condition %s wasn't satified"
+                    _logger.info("Skipped execution of server action %s for %s with filter, condition %s wasn't satisfied"
                                  %(action.name, record, action.filter_id.domain))
             else:
                 super(IrActionsServer, action).run()
