@@ -137,15 +137,22 @@ class IrActionsServer(models.Model):
     @api.multi
     def run(self):
         res = False
-        for record in self:
-            if record.filter_id.domain:
-                result = record.validate_server_action()
+
+
+        for action in self:
+            eval_context = self._get_eval_context(action)
+            model = eval_context.get('model')
+            record = eval_context.get('record')
+            if action.filter_id.domain:
+                result = action.validate_server_action()
                 if result:
-                    res = super(IrActionsServer, record).run()
+                    res = super(IrActionsServer, action).run()
+                else:
+                    _logger.info("Skipped execution of server action %s for %s with filter, condition %s wasn't satified"
+                                 %(action.name, record, action.filter_id.domain))
             else:
-                super(IrActionsServer, record).run()
+                super(IrActionsServer, action).run()
         return res
-       # return super(IrActionsServer, self).run()
 
 class DynamicSelection(models.Model):
     _name = 'dynamic.selection'
