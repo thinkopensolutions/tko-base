@@ -116,5 +116,5 @@ class PatternParserAgent(models.Model):
                         # Char and Text Fields
                         setattr(record, self.label_field_id.name, value)
             else:
-                _logger.info("Skipping parser no text was found for record %s" %record)
+                _logger.info("Skipping parser execution no text was found for record %s" %record)
         return True
