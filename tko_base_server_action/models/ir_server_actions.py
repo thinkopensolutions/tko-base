@@ -133,6 +133,13 @@ class IrActionsServer(models.Model):
             _logger.error("Server Action was called without 'active_id' not executed")
         return False
 
+    @api.model
+    def _get_eval_context(self, action=None):
+        res = super(IrActionsServer, self)._get_eval_context(action)
+        if not res['records'] and res['record']:
+            res['records'] = res['record']
+        return res
+
     # if filter is set, execute server action only if condition is satisfied
     @api.multi
     def run(self):
