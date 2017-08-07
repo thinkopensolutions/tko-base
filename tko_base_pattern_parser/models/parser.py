@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import regex
 from odoo import fields, api, models
 
 
@@ -81,7 +82,7 @@ class PatternParserAgent(models.Model):
                 pattern = self.pattern_id.pattern
                 if pattern_type == 'r':
                     pattern = self.pattern_id.pattern.encode('utf-8')
-                    match = re.search(pattern, text)
+                    match = regex.search(pattern, text)
                     if match:
                         value = match.group(0)
                 if pattern_type == 'fi' or pattern_type == 'v':
