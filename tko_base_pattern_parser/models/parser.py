@@ -2,7 +2,8 @@
 import re
 import regex
 from odoo import fields, api, models
-
+import logging
+_logger = logging.getLogger(__name__)
 
 class PatternConfig(models.Model):
     _name = 'pattern.config'
@@ -70,6 +71,7 @@ class PatternParserAgent(models.Model):
 
     @api.one
     def _parse(self, records):
+        _logger.info("Executing parser ==> %s ..." %self.name)
         pattern_type = self.pattern_id.pattern_type
         for record in records:
             # Read Text
@@ -95,6 +97,7 @@ class PatternParserAgent(models.Model):
                         end = text.find(suffix)
                     if end != -1:
                         value = text[start:end]
+                _logger.info("Result =====> %s"%value.decode('utf-8'))
                 if value:
                     # Get record ID for Many2one and many2many fields
                     if self.label_field_id.ttype == 'many2one' or self.label_field_id.ttype == 'many2many':
@@ -112,4 +115,6 @@ class PatternParserAgent(models.Model):
                     else:
                         # Char and Text Fields
                         setattr(record, self.label_field_id.name, value)
+            else:
+                _logger.info("Skipping parser no text was found for record %s" %record)
         return True
