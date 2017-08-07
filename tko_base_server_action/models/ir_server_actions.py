@@ -133,6 +133,9 @@ class IrActionsServer(models.Model):
             _logger.error("Server Action was called without 'active_id' not executed")
         return False
 
+    # set records in eval context in case records aren't set
+    # it happens calling server action from a one2many field
+    # active_ids aren't set
     @api.model
     def _get_eval_context(self, action=None):
         res = super(IrActionsServer, self)._get_eval_context(action)
