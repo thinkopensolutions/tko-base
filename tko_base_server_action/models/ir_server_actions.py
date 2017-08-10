@@ -41,6 +41,12 @@ class IrActionsServer(models.Model):
     validate_filter_obj = fields.Boolean("Filter Object", compute='validate_filter_object')
     field_id = fields.Many2one('ir.model.fields', 'Fields')
 
+    @api.multi
+    def copy(self, default=None):
+        self.ensure_one()
+        default = dict(default or {}, name=_("%s (copy)") % (self.name))
+        return super(IrActionsServer, self).copy(default)
+
     @api.model
     def _get_states(self):
         res = super(IrActionsServer, self)._get_states()
