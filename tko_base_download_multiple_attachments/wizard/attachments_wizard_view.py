@@ -82,8 +82,11 @@ class download_attachments(models.TransientModel):
                     full_path = attachment_obj._full_path(attachment.store_fname)
                     new_file = os.path.join(attachment_dir, attachment.name)
                     # copying in a new directory with a new name
-                    # shutil.copy2(full_path, new_file)
-                    shutil.copy2(full_path, new_file)
+                    # shutil.copyfile(full_path, new_file)
+                    try:
+                        shutil.copy2(full_path, new_file)
+                    except:
+                        raise UserError(_("Not Proper attachment to download"))
                     head, tail = ntpath.split(new_file)
                     # change working directory otherwise it tars all parent directory
                     os.chdir(head)
