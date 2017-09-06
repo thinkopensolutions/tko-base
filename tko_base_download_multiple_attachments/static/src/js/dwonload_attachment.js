@@ -1,4 +1,4 @@
-openerp.tko_base_knowledge_download_all_attachments = function(session) {
+/*openerp.tko_base_knowledge_download_all_attachments = function(session) {
     var _t = session.web._t;
     var has_action_id = false;
 
@@ -32,11 +32,11 @@ openerp.tko_base_knowledge_download_all_attachments = function(session) {
            
           });
         });
-    }
+    } */
 
 
     /* Extend the Sidebar to add Send Mail  links in the 'More' menu */
-    session.web.Sidebar = session.web.Sidebar.extend({
+    /*session.web.Sidebar = session.web.Sidebar.extend({
 	
         start: function () {
             var self = this;
@@ -65,4 +65,4 @@ openerp.tko_base_knowledge_download_all_attachments = function(session) {
     });
 
 
-};
+}; */
