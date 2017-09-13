@@ -32,15 +32,6 @@ class download_attachments(models.TransientModel):
         return res
 
     @api.multi
-    def download_wizard(self):
-        # wizard_data = self.browse(cr, uid, ids, context)[0]
-        model, res_id = self.env['ir.model.data'].get_object_reference('tko_base_knowledge_download_all_attachments','download_attachments_wizard_actoin')
-        action = self.pool[model].read([res_id])[0]
-        action['res_id'] = ids[0]
-        action.pop('context', '')
-        return action
-  
-    @api.multi
     def download_attachments(self):
         cache_buster = randint(10000000000, 90000000000)
         config_obj = self.env['ir.config_parameter']
@@ -80,7 +71,12 @@ class download_attachments(models.TransientModel):
                 for attachment in attachment_obj.browse(attachment_ids):
                     # to get full path of file
                     full_path = attachment_obj._full_path(attachment.store_fname)
-                    new_file = os.path.join(attachment_dir, attachment.name)
+                    attachment_name = attachment.name
+                    try:
+                        attachment_name = attachment_name.replace('/', '_')
+                    except:
+                        pass
+                    new_file = os.path.join(attachment_dir, attachment_name)
                     # copying in a new directory with a new name
                     # shutil.copyfile(full_path, new_file)
                     try:
@@ -109,34 +105,3 @@ class download_attachments(models.TransientModel):
                     'url': url,
                     'nodestroy': False,
                 }
-
-    @api.multi
-    def get_attachment_ids(self):
-        attachment_ids = []
-        context = self._context
-        for i in self._context.get('active_ids'):
-            attachments = attachment_obj.search([('res_model','=',str(active_model)),('res_id','in',active_ids)])
-        for attachment in attachments:
-            attachment_ids.append(attachment.id)
-        result = {}
-        context = self._context
-        attachment_model = self.env['ir.attachment']
-        if 'context' in context.keys():
-            if '__contexts' in context['context'].keys():
-                if len(context['context']['__contexts']):
-                    attach_dict = context['context']['__contexts'][0]
-                    active_model = attach_dict['attach_res_model']
-                    active_id = attach_dict['attach_res_id']
-                    attachment_ids = attachment_model.search([('res_model', '=', active_model),
-                                                                       ('res_id', '=', active_id)])
-                    file_size = 0
-                    for attachments in attachmen25t_model.browse(attachment_ids):
-                        file_size = file_size + attachments.file_size
-                    # check attachment size in MB
-                    file_size = file_size / 1048576
-                    if file_size > 25:
-                        raise UserError(_("Attachments size exceeds the limit (25MB), please remove some."))
-                result.update({'active_model': active_model, 'active_id': active_id})
-        result.update({'attachment_ids': attachment_ids})
-        return result
-
