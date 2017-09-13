@@ -29,5 +29,7 @@
     'data': [
             'security/ir.model.access.csv',
              'views/ir_server_actions_view.xml',
+             'static/src/xml/server_action_wizard_view.xml',
+        'wizard/server_action_view.xml',
     ],
 }
