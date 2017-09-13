@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Execute server actions -->
+        <record id="multiple_duplicates_form" model="ir.ui.view">
+            <field name="name">Server Action</field>
+            <field name="model">execute.server.action</field>
+            <field name="arch" type="xml">
+                <form string="Contract Template">
+                    <group name="group_name">
+                        <field name="server_action_id" required="1" options="{'no_create': True}" domain="[('model_id','=',model_id)]"/>
+                        <field name="filter_id" options="{'no_create': True}" domain="[('model_id','=',model)]"/>
+                        <field name="model_id" invisible="1"/>
+                        <field name="model" invisible="1"/>
+                    </group>
+                    <footer>
+                        <button name="execute_server_action" string="Execute"
+                                type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link"
+                                special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="server_action_action" model="ir.actions.act_window">
+            <field name="name">Server Action</field>
+            <field name="res_model">execute.server.action</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</odoo>
