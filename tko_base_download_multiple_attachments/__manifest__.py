@@ -37,7 +37,6 @@
     ],
     'init_xml': [],
     'data': [
-        # 'static/src/xml/download_attachments_view.xml',
         'wizard/attachments_wizard_view.xml',
     ],
     'demo_xml': [],
