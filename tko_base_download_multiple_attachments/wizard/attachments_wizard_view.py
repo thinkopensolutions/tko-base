@@ -76,13 +76,17 @@ class download_attachments(models.TransientModel):
                         attachment_name = attachment_name.replace('/', '_')
                     except:
                         pass
+                    try:
+                        attachment_name = attachment_name.replace('-', '_')
+                    except:
+                        pass
                     new_file = os.path.join(attachment_dir, attachment_name)
                     # copying in a new directory with a new name
                     # shutil.copyfile(full_path, new_file)
                     try:
                         shutil.copy2(full_path, new_file)
                     except:
-                        raise UserError(_("Not Proper attachment to download"))
+                        raise UserError(_("Not Proper file name to download"))
                     head, tail = ntpath.split(new_file)
                     # change working directory otherwise it tars all parent directory
                     os.chdir(head)
