@@ -149,32 +149,106 @@ class IrActionsServer(models.Model):
             res['records'] = res['record']
         return res
 
+    @api.multi
+    def tko_run(self, current_active_id):
+        """ Runs the server action. For each server action, the condition is
+        checked. Note that a void (``False``) condition is considered as always
+        valid. If it is verified, the run_action_<STATE> method is called. This
+        allows easy overriding of the server actions.
+
+        :param dict context: context should contain following keys
+
+                             - active_id: id of the current object (single mode)
+                             - active_model: current model that should equal the action's model
+
+                             The following keys are optional:
+
+                             - active_ids: ids of the current records (mass mode). If active_ids
+                               and active_id are present, active_ids is given precedence.
+
+        :return: an action_id to be executed, or False is finished correctly without
+                 return action
+        """
+        res = False
+        for action in self:
+            eval_context = self._get_eval_context(action)
+            model = eval_context.get('model')
+            active_ids = eval_context.get('records').ids
+            condition = action.condition
+            if condition is False:
+                # Void (aka False) conditions are considered as True
+                condition = True
+            if hasattr(self, 'run_action_%s_multi' % action.state):
+                expr = safe_eval(str(condition), eval_context)
+                if not expr:
+                    continue
+                # call the multi method
+                run_self = self.with_context(eval_context['context'])
+
+                _logger.info("Executing server action %s with method run_action_%s_multi for model %s with IDs %s"
+                             % (action.name, action.state, model, active_ids))
+                func = getattr(run_self, 'run_action_%s_multi' % action.state)
+                res = func(action, eval_context=eval_context)
+
+            elif hasattr(self, 'run_action_%s' % action.state):
+                run_self = self.with_context(active_ids=[current_active_id], active_id=current_active_id)
+                eval_context["context"] = run_self._context
+                expr = safe_eval(str(condition), eval_context)
+                if not expr:
+                    continue
+                _logger.info("Executing server action %s with method run_action_%s for model %s with IDs %s"
+                             % (action.name, action.state, model, [current_active_id]))
+                # call the single method related to the action: run_action_<STATE>
+                func = getattr(run_self, 'run_action_%s' % action.state)
+                new_context = dict(self._context)
+                new_context.update({'current_active_id' : current_active_id, 'active_id' : current_active_id})
+                action = action.with_context(new_context)
+                res = func(action, eval_context=eval_context)
+        return res
+
+
     # if filter is set, execute server action only if condition is satisfied
     @api.multi
     def run(self):
         res = False
-
-
-        for action in self:
-            eval_context = self._get_eval_context(action)
-            model = eval_context.get('model')
-            record = eval_context.get('record')
-            if action.filter_id.domain:
-                result = action.validate_server_action()
-                if result:
-                    res = super(IrActionsServer, action).run()
+        context = self._context
+        current_active_id = context.get('current_active_id',False)
+        if current_active_id:
+            for action in self:
+                eval_context = action._get_eval_context(action)
+                record = eval_context.get('record')
+                if action.filter_id.domain:
+                    result = action.validate_server_action()
+                    if result:
+                        res = action.tko_run(current_active_id)
+                    else:
+                        _logger.info(
+                            "Skipped execution of server action %s for %s with filter, condition %s wasn't satisfied"
+                            % (action.name, record, action.filter_id.domain))
                 else:
-                    _logger.info("Skipped execution of server action %s for %s with filter, condition %s wasn't satisfied"
-                                 %(action.name, record, action.filter_id.domain))
-            else:
-                super(IrActionsServer, action).run()
+                    res = action.tko_run(current_active_id)
+            return res
+        active_ids = self._context.get('active_ids',[])
+        for action in self:
+            for active_id in active_ids:
+                eval_context = self._get_eval_context(action)
+                record = eval_context.get('record')
+                if action.filter_id.domain:
+                    result = action.validate_server_action()
+                    if result:
+                        res = action.tko_run(active_id)
+                    else:
+                        _logger.info("Skipped execution of server action %s for %s with filter, condition %s wasn't satisfied"
+                                     %(action.name, record, action.filter_id.domain))
+                else:
+                    res = action.tko_run(active_id)
         return res
 
 class DynamicSelection(models.Model):
     _name = 'dynamic.selection'
 
     name = fields.Char('Name')
-    record_id = fields.Integer("Record ID")
+    current_active_id = fields.Integer("Record ID")
 
 class IrServerObjectLines(models.Model):
     _inherit = 'ir.server.object.lines'
@@ -194,7 +268,7 @@ class IrServerObjectLines(models.Model):
                 dynamic_obj.search([]).unlink()
                 for record in records:
                     dynamic_obj.create({'name' : record.name,
-                                        'record_id': record.id})
+                                        'current_active_id': record.id})
         self.col1 = col1
         self.value = value
 
@@ -202,6 +276,6 @@ class IrServerObjectLines(models.Model):
     @api.onchange('dynamic_selection_id')
     def onchange_dynamic_selection(self):
         if self.dynamic_selection_id:
-            self.value = self.dynamic_selection_id.record_id
+            self.value = self.dynamic_selection_id.current_active_id
 
 
