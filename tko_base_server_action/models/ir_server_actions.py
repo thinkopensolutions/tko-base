@@ -229,6 +229,9 @@ class IrActionsServer(models.Model):
                     res = action.tko_run(current_active_id)
             return res
         active_ids = self._context.get('active_ids',[])
+        active_id = self._context.get('active_id',False)
+        if not len(active_ids) and active_id:
+            active_ids = [active_id]
         for action in self:
             for active_id in active_ids:
                 eval_context = self._get_eval_context(action)
