@@ -7,6 +7,11 @@ from random import randint
 from odoo.exceptions import ValidationError, UserError
 from odoo import api, fields, models, _
 
+class Attachments(models.Model):
+    _inherit = "ir.attachment"
+
+    downloded = fields.Char('Downloaded?')
+
 
 class download_attachments(models.TransientModel):
     _name = 'download.attachments'
@@ -64,12 +69,14 @@ class download_attachments(models.TransientModel):
             if value and active_id and active_model:
                 # change working directory otherwise file is tared with all its parent directories
                 original_dir = os.getcwd()
-
-                if not attachment_ids:
+                filter_attachments=[]
+                for attach in attachment_obj.browse(attachment_ids):
+                    if not attach.mimetype == 'application/javascript' and not attach.downloded:
+                            filter_attachments.append(attach.id)
+                if not filter_attachments:
                     raise UserError(_("No attachment to download"))
-
-                for attachment in attachment_obj.browse(attachment_ids):
-                    # to get full path of file
+                for attachment in attachment_obj.browse(filter_attachments):
+                    # to get full path of file                    
                     full_path = attachment_obj._full_path(attachment.store_fname)
                     attachment_name = attachment.name
                     try:
@@ -88,6 +95,7 @@ class download_attachments(models.TransientModel):
                     except:
                         raise UserError(_("Not Proper file name to download"))
                     head, tail = ntpath.split(new_file)
+                    attachment.write({'downloded':True})
                     # change working directory otherwise it tars all parent directory
                     os.chdir(head)
                     tFile.add(tail)
