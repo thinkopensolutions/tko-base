@@ -81,7 +81,7 @@ class download_attachments(models.TransientModel):
                 for attachment in attachment_obj.browse(filter_attachments):
                     # to get full path of file
                     full_path = attachment_obj._full_path(attachment.store_fname)
-                    attachment_name = attachment.name
+                    attachment_name = attachment.datas_fname
                     new_file = os.path.join(attachment_dir, attachment_name)
                     # copying in a new directory with a new name
                     # shutil.copyfile(full_path, new_file)
