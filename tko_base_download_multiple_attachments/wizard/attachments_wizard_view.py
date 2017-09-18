@@ -6,11 +6,14 @@ from random import randint
 
 from odoo.exceptions import ValidationError, UserError
 from odoo import api, fields, models, _
+import logging
+_logger = logging.getLogger(__name__)
 
 class Attachments(models.Model):
     _inherit = "ir.attachment"
 
-    downloded = fields.Char('Downloaded?')
+    downloded = fields.Boolean('Downloaded?')
+    active = fields.Boolean('Active?', default=True)
 
 
 class download_attachments(models.TransientModel):
@@ -38,11 +41,9 @@ class download_attachments(models.TransientModel):
 
     @api.multi
     def download_attachments(self):
-        cache_buster = randint(10000000000, 90000000000)
         config_obj = self.env['ir.config_parameter']
         attachment_obj = self.env['ir.attachment']
-        
-        active_model = self._context.get('active_model')
+
         active_ids = self._context.get('active_ids')
         attachment_ids = active_ids
         ids = self._ids
@@ -54,11 +55,16 @@ class download_attachments(models.TransientModel):
         else:
             shutil.rmtree(attachment_dir)
             os.makedirs(attachment_dir)
-        file_name = 'files'
+        file_name = 'attachments'
         if isinstance(ids, int):
             ids = [ids]
         wzrd_obj = self
         config_ids = config_obj.search([('key', '=', 'web.base.url')])
+        invalid_downloads = self.env['ir.attachment'].search([('downloded','=',True)])
+        invalid_downloads_ids  = invalid_downloads.ids
+
+        attachment_ids = [attachment_id for attachment_id in attachment_ids if attachment_id not in invalid_downloads_ids]
+        invalid_downloads.unlink()
         if len(config_ids):
             value = config_ids[0].value
             active_model = 'ir.attachment'  # wzrd_obj.active_model
@@ -69,49 +75,46 @@ class download_attachments(models.TransientModel):
             if value and active_id and active_model:
                 # change working directory otherwise file is tared with all its parent directories
                 original_dir = os.getcwd()
-                filter_attachments=[]
+                filter_attachments = []
                 for attach in attachment_obj.browse(attachment_ids):
-                    if not attach.mimetype == 'application/javascript' and not attach.downloded:
-                            filter_attachments.append(attach.id)
+                    if not attach.downloded:
+                        filter_attachments.append(attach.id)
                 if not filter_attachments:
                     raise UserError(_("No attachment to download"))
                 for attachment in attachment_obj.browse(filter_attachments):
-                    # to get full path of file                    
+                    # to get full path of file
                     full_path = attachment_obj._full_path(attachment.store_fname)
                     attachment_name = attachment.name
-                    try:
-                        attachment_name = attachment_name.replace('/', '_')
-                    except:
-                        pass
-                    try:
-                        attachment_name = attachment_name.replace('-', '_')
-                    except:
-                        pass
                     new_file = os.path.join(attachment_dir, attachment_name)
                     # copying in a new directory with a new name
                     # shutil.copyfile(full_path, new_file)
                     try:
                         shutil.copy2(full_path, new_file)
                     except:
-                        raise UserError(_("Not Proper file name to download"))
-                    head, tail = ntpath.split(new_file)
-                    attachment.write({'downloded':True})
+                        pass
+                        #raise UserError(_("Not Proper file name to download"))
+                    head, tail = ntpath.split(full_path)
                     # change working directory otherwise it tars all parent directory
                     os.chdir(head)
-                    tFile.add(tail)
+                    try:
+                        tFile.add(tail)
+                    except:
+                        _logger.error("No such file was found : %s" %tail)
                 tFile.close()
                 os.chdir(original_dir)
                 values = {
-                            'name': file_name + '.tar.gz',
-                            'datas_fname': file_name + '.tar.gz',
-                            'res_model': 'download.attachments',
-                            'res_id': ids[0],
-                            'res_name': 'test....',
-                            'type': 'binary',
-                            'store_fname': 'attachments/files',
-                        }
+                    'name': file_name + '.tar.gz',
+                    'datas_fname': file_name + '.tar.gz',
+                    'res_model': 'download.attachments',
+                    'res_id': ids[0],
+                    'res_name': 'test....',
+                    'type': 'binary',
+                    'store_fname': 'attachments/files',
+                    'downloded': True,
+                    'active' : False,
+                }
                 attachment_id = self.env['ir.attachment'].create(values)
-                url = "%s/web/content/%s?download=true" %(value, attachment_id.id)
+                url = "%s/web/content/%s?download=true" % (value, attachment_id.id)
                 return {
                     'type': 'ir.actions.act_url',
                     'url': url,
