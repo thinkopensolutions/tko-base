@@ -12,7 +12,6 @@ _logger = logging.getLogger(__name__)
 class Attachments(models.Model):
     _inherit = "ir.attachment"
 
-    downloded = fields.Boolean('Downloaded?')
     active = fields.Boolean('Active?', default=True)
 
 
@@ -60,11 +59,9 @@ class download_attachments(models.TransientModel):
             ids = [ids]
         wzrd_obj = self
         config_ids = config_obj.search([('key', '=', 'web.base.url')])
-        invalid_downloads = self.env['ir.attachment'].search([('downloded','=',True)])
-        invalid_downloads_ids  = invalid_downloads.ids
+        self.env['ir.attachment'].search([('active','=',False)]).unlink()
 
-        attachment_ids = [attachment_id for attachment_id in attachment_ids if attachment_id not in invalid_downloads_ids]
-        invalid_downloads.unlink()
+
         if len(config_ids):
             value = config_ids[0].value
             active_model = 'ir.attachment'  # wzrd_obj.active_model
@@ -77,14 +74,14 @@ class download_attachments(models.TransientModel):
                 original_dir = os.getcwd()
                 filter_attachments = []
                 for attach in attachment_obj.browse(attachment_ids):
-                    if not attach.downloded:
+                    if attach.active:
                         filter_attachments.append(attach.id)
                 if not filter_attachments:
                     raise UserError(_("No attachment to download"))
                 for attachment in attachment_obj.browse(filter_attachments):
                     # to get full path of file
                     full_path = attachment_obj._full_path(attachment.store_fname)
-                    attachment_name = attachment.name
+                    attachment_name = attachment.datas_fname
                     new_file = os.path.join(attachment_dir, attachment_name)
                     # copying in a new directory with a new name
                     # shutil.copyfile(full_path, new_file)
@@ -93,7 +90,7 @@ class download_attachments(models.TransientModel):
                     except:
                         pass
                         #raise UserError(_("Not Proper file name to download"))
-                    head, tail = ntpath.split(full_path)
+                    head, tail = ntpath.split(new_file)
                     # change working directory otherwise it tars all parent directory
                     os.chdir(head)
                     try:
@@ -109,8 +106,7 @@ class download_attachments(models.TransientModel):
                     'res_id': ids[0],
                     'res_name': 'test....',
                     'type': 'binary',
-                    'store_fname': 'attachments/files',
-                    'downloded': True,
+                    'store_fname': 'attachments/attachments',
                     'active' : False,
                 }
                 attachment_id = self.env['ir.attachment'].create(values)
