@@ -191,7 +191,10 @@ class IrActionsServer(models.Model):
                 res = func(action, eval_context=eval_context)
 
             elif hasattr(self, 'run_action_%s' % action.state):
-                run_self = self.with_context(active_ids=[current_active_id], active_id=current_active_id)
+                active_id = self._context.get('active_id',False)
+                run_self = self.with_context(active_ids=[active_id], active_id=active_id)
+                if action.state == 'multi':
+                    run_self = self.with_context(active_ids=[current_active_id], active_id=current_active_id)
                 eval_context["context"] = run_self._context
                 expr = safe_eval(str(condition), eval_context)
                 if not expr:
@@ -202,6 +205,9 @@ class IrActionsServer(models.Model):
                 func = getattr(run_self, 'run_action_%s' % action.state)
                 new_context = dict(self._context)
                 new_context.update({'current_active_id' : current_active_id, 'active_id' : current_active_id})
+                if not new_context.get('current_active_model',False):
+                    new_context.update({'current_active_model' : new_context.get('active_model')})
+
                 action = action.with_context(new_context)
                 res = func(action, eval_context=eval_context)
         return res
@@ -213,7 +219,14 @@ class IrActionsServer(models.Model):
         res = False
         context = self._context
         current_active_id = context.get('current_active_id',False)
+
+
         if current_active_id:
+            # this is required in case server action on another model is executed
+            # happens from automated actions
+            current_active_model = context.get('current_active_model', False)
+            if context.get('active_model') != current_active_model and current_active_id:
+                current_active_id = context.get('active_id')
             for action in self:
                 eval_context = action._get_eval_context(action)
                 record = eval_context.get('record')
