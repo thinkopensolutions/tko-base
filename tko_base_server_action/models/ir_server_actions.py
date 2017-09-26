@@ -191,10 +191,7 @@ class IrActionsServer(models.Model):
                 res = func(action, eval_context=eval_context)
 
             elif hasattr(self, 'run_action_%s' % action.state):
-                active_id = self._context.get('active_id',False)
-                run_self = self.with_context(active_ids=[active_id], active_id=active_id)
-                if action.state == 'multi':
-                    run_self = self.with_context(active_ids=[current_active_id], active_id=current_active_id)
+                run_self = self.with_context(active_ids=[current_active_id], active_id=current_active_id)
                 eval_context["context"] = run_self._context
                 expr = safe_eval(str(condition), eval_context)
                 if not expr:
