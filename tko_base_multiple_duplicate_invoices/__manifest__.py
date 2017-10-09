@@ -32,7 +32,7 @@
     'author': 'ThinkOpen Solutions',
     'website': 'http://www.thinkopensolution.com',
     'images': ['images/oerp61.jpeg', ],
-    'depends': [
+    'depends': ['account',
         'tko_base_multiple_duplicate',
     ],
     'init_xml': [],
