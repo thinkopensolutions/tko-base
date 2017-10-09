@@ -32,12 +32,13 @@
     'author': 'ThinkOpen Solutions',
     'website': 'http://www.thinkopensolution.com',
     'images': ['images/oerp61.jpeg', ],
-    'depends': [
+    'depends': ['account'
         'tko_base_multiple_duplicate',
     ],
     'init_xml': [],
     'data': [
         'wizard/mulitiple_duplicate_view.xml',
+        'views/internal_data.xml',
     ],
     'demo_xml': [],
     'installable': True,
