@@ -38,7 +38,6 @@
     'init_xml': [],
     'data': [
         'wizard/mulitiple_duplicate_view.xml',
-        'views/internal_data.xml',
     ],
     'demo_xml': [],
     'installable': True,

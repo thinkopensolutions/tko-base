@@ -89,62 +89,48 @@ class multiple_duplicates(models.TransientModel):
             days = weeks = months = years = 0
             create_interval_unit = self.create_interval_unit
             create_days = create_weeks = create_months = create_years = 0
-            today = fields.Date.today()
+            for i in range(0, self.name):
+                if interval_unit == 'd':
+                    days = self.interval
+                if interval_unit == 'm':
+                    months = self.interval
+                if interval_unit == 'w':
+                    weeks = self.interval
+                if interval_unit == 'y':
+                    years = self.interval
 
-            if interval_unit == 'd':
-                days = self.interval
-            if interval_unit == 'm':
-                months = self.interval
-            if interval_unit == 'w':
-                weeks = self.interval
-            if interval_unit == 'y':
-                years = self.interval
-            if base_invoice_date:
-                next_invoice_date = datetime.strptime(str(base_invoice_date), DF).date() + relativedelta(days=days,
-                                                                            weeks=weeks, months=months, years=years)
-            #Schedule Date            
-            if create_interval_unit == 'd':
-                create_days = self.create_interval
-            if create_interval_unit == 'm':
-                create_months = self.create_interval
-            if create_interval_unit == 'w':
-                create_weeks = self.create_interval
-            if create_interval_unit == 'y':
-                create_years = self.create_interval
-            schedule_date = datetime.strptime(str(today), DF) + relativedelta(days=create_days, weeks=create_weeks, months=create_months,years=years)
-                                
-            next_date_due = datetime.strptime(str(base_date_due), DF).date() + relativedelta(days=days,
+                if create_interval_unit == 'd':
+                    create_days = self.create_interval
+                if create_interval_unit == 'm':
+                    create_months = self.create_interval
+                if create_interval_unit == 'w':
+                    create_weeks = self.create_interval
+                if create_interval_unit == 'y':
+                    create_years = self.create_interval
+
+                if base_invoice_date:
+                    next_invoice_date = datetime.strptime(str(base_invoice_date), DF).date() + relativedelta(days=create_days,
+                                                                                                         weeks=create_weeks,
+                                                                                                         months=create_months,
+                                                                                                         years=create_years)
+                next_date_due = datetime.strptime(str(base_date_due), DF).date() + relativedelta(days=days,
                                                                                                  weeks=weeks,
                                                                                                  months=months,
                                                                                                  years=years)
-            if self.create_interval == 0:
-                for i in range(0, self.name):
-                    new_inv = self.env[res_model].browse(res_id).copy(
-                        {'date_due': next_date_due, 'date_invoice': next_invoice_date})
-                    new_invs.append(new_inv.id)
-                    if base_invoice_date:
-                        base_invoice_date = next_invoice_date
-                    base_date_due = next_date_due
-                    _logger.info("Duplicating invoice %s wtih emission date %s, %s time " % (
-                        invoice.name, next_date_due, i + 1))
-                return {
-                    'view_type': 'form',
-                    'view_mode': 'tree,form',
-                    'res_model': res_model,
-                    'domain': [('id', 'in', new_invs)],
-                    'type': 'ir.actions.act_window',
-                }
-            else:
-                invoice.write({'schedule_date':schedule_date.date(),
-                                'next_date_due':next_date_due,
-                                'next_invoice_date':next_invoice_date,
-                                'repeat': self.name})
-                # return {
-                #     'view_type': 'form',
-                #     'view_mode': 'tree,form',
-                #     'res_model': res_model,
-                #     'domain': [('id', '=', invoice.id)],
-                #     'type': 'ir.actions.act_window',
-                # }
+                new_inv = self.env[res_model].browse(res_id).copy(
+                    {'date_due': next_date_due, 'date_invoice': next_invoice_date})
+                new_invs.append(new_inv.id)
+                if base_invoice_date:
+                    base_invoice_date = next_invoice_date
+                base_date_due = next_date_due
+                _logger.info("Duplicating invoice %s wtih emission date %s, %s time " % (
+                    invoice.name, next_date_due, i + 1))
+            return {
+                'view_type': 'form',
+                'view_mode': 'tree,form',
+                'res_model': res_model,
+                'domain': [('id', 'in', new_invs)],
+                'type': 'ir.actions.act_window',
+            }
         else:
             return super(multiple_duplicates, self).duplicate_records()
