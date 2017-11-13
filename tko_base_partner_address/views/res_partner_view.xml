@@ -1,4 +1,4 @@
-<openerp>
+<odoo>
     <data>
         <record id="view_tko_base_partner_form_inherit" model="ir.ui.view">
             <field name="name">tko.base.replace.partner.form</field>
@@ -24,5 +24,5 @@
             </field>
         </record>
     </data>
-</openerp>
+</odoo>
 <!--  -->
