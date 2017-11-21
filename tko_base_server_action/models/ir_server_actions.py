@@ -69,7 +69,6 @@ class IrActionsServer(models.Model):
                 res = result
         return res
 
-
     @api.constrains('model_id', 'field_id')
     def validate_field(self):
         """
@@ -201,22 +200,20 @@ class IrActionsServer(models.Model):
                 # call the single method related to the action: run_action_<STATE>
                 func = getattr(run_self, 'run_action_%s' % action.state)
                 new_context = dict(self._context)
-                new_context.update({'current_active_id' : current_active_id, 'active_id' : current_active_id})
-                if not new_context.get('current_active_model',False):
-                    new_context.update({'current_active_model' : new_context.get('active_model')})
+                new_context.update({'current_active_id': current_active_id, 'active_id': current_active_id})
+                if not new_context.get('current_active_model', False):
+                    new_context.update({'current_active_model': new_context.get('active_model')})
 
                 action = action.with_context(new_context)
                 res = func(action, eval_context=eval_context)
         return res
-
 
     # if filter is set, execute server action only if condition is satisfied
     @api.multi
     def run(self):
         res = False
         context = self._context
-        current_active_id = context.get('current_active_id',False)
-
+        current_active_id = context.get('current_active_id', False)
 
         if current_active_id:
             # this is required in case server action on another model is executed
@@ -238,8 +235,13 @@ class IrActionsServer(models.Model):
                 else:
                     res = action.tko_run(current_active_id)
             return res
-        active_ids = self._context.get('active_ids',[])
-        active_id = self._context.get('active_id',False)
+        else:
+            # this case is when odoo calls run directly without passing current_active_id
+            # eg: My Pipeline on CRM
+
+            return super(IrActionsServer, self).run()
+        active_ids = self._context.get('active_ids', [])
+        active_id = self._context.get('active_id', False)
         if not len(active_ids) and active_id:
             active_ids = [active_id]
         for action in self:
@@ -251,17 +253,20 @@ class IrActionsServer(models.Model):
                     if result:
                         res = action.tko_run(active_id)
                     else:
-                        _logger.info("Skipped execution of server action %s for %s with filter, condition %s wasn't satisfied"
-                                     %(action.name, record, action.filter_id.domain))
+                        _logger.info(
+                            "Skipped execution of server action %s for %s with filter, condition %s wasn't satisfied"
+                            % (action.name, record, action.filter_id.domain))
                 else:
                     res = action.tko_run(active_id)
         return res
+
 
 class DynamicSelection(models.Model):
     _name = 'dynamic.selection'
 
     name = fields.Char('Name')
     current_active_id = fields.Integer("Record ID")
+
 
 class IrServerObjectLines(models.Model):
     _inherit = 'ir.server.object.lines'
@@ -280,15 +285,12 @@ class IrServerObjectLines(models.Model):
             if self.col1.ttype in ['many2one', 'many2many']:
                 dynamic_obj.search([]).unlink()
                 for record in records:
-                    dynamic_obj.create({'name' : record.name,
+                    dynamic_obj.create({'name': record.name,
                                         'current_active_id': record.id})
         self.col1 = col1
         self.value = value
-
 
     @api.onchange('dynamic_selection_id')
     def onchange_dynamic_selection(self):
         if self.dynamic_selection_id:
             self.value = self.dynamic_selection_id.current_active_id
-
-
