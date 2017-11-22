@@ -63,11 +63,11 @@ class AccountInvoice(models.Model):
 class multiple_duplicates(models.TransientModel):
     _inherit = 'multiple.duplicates'
 
-    interval = fields.Integer('Interval to compute due date and invoice date')
+    interval = fields.Integer('Interval to compute due date')
     interval_unit = fields.Selection([('d', 'Days'), ('w', 'Weeks'), ('m', 'Months'), ('y', 'Years')], default='d',
                                      required=True, string='Time between due dates')
 
-    create_interval = fields.Integer('Interval to compute Create invoice date')
+    create_interval = fields.Integer('Interval to compute creation date')
     create_interval_unit = fields.Selection([('d', 'Days'), ('w', 'Weeks'), ('m', 'Months'), ('y', 'Years')], default='d',
                                      required=True, string='Time to Create Invoice')
 
