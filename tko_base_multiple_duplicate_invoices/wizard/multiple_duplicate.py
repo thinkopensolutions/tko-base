@@ -23,7 +23,7 @@
 ##############################################################################
 
 import logging
-from datetime import datetime
+from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 
 from odoo import _
@@ -40,12 +40,37 @@ interval_dict = {'d': 'days',
                  }
 
 
+class AccountInvoice(models.Model):
+    _inherit = 'account.invoice'
+
+    schedule_date = fields.Date(string='Schedule on', index=True, copy=False)
+    next_date_due = fields.Date(string="Next Date Due", index=True, copy=False)
+    next_invoice_date = fields.Date(string="Next Invoice Date", index=True, copy=False)
+    repeat = fields.Integer(string="Number of Repeat", index=True, copy=False) 
+
+    @api.model
+    # @api.multi
+    def scheduler_duplicate_records(self):
+        recs = self.search(
+            [('schedule_date', '<=', fields.Date.today())])
+        if len(recs):
+            for rec in recs:
+                for i in range(0, rec.repeat):
+                    new_inv = rec.copy(
+                        {'date_due': rec.next_date_due, 'date_invoice': rec.next_invoice_date})
+        return True
+
 class multiple_duplicates(models.TransientModel):
     _inherit = 'multiple.duplicates'
 
-    interval = fields.Integer('Interval to compute due date and invoice date')
+    interval = fields.Integer('Interval to compute due date')
     interval_unit = fields.Selection([('d', 'Days'), ('w', 'Weeks'), ('m', 'Months'), ('y', 'Years')], default='d',
                                      required=True, string='Time between due dates')
+
+    create_interval = fields.Integer('Interval to compute creation date')
+    create_interval_unit = fields.Selection([('d', 'Days'), ('w', 'Weeks'), ('m', 'Months'), ('y', 'Years')], default='d',
+                                     required=True, string='Time to Create Invoice')
+
 
     @api.multi
     def duplicate_records(self):
@@ -62,6 +87,8 @@ class multiple_duplicates(models.TransientModel):
             base_invoice_date = invoice.date_invoice
             interval_unit = self.interval_unit
             days = weeks = months = years = 0
+            create_interval_unit = self.create_interval_unit
+            create_days = create_weeks = create_months = create_years = 0
             for i in range(0, self.name):
                 if interval_unit == 'd':
                     days = self.interval
@@ -71,20 +98,30 @@ class multiple_duplicates(models.TransientModel):
                     weeks = self.interval
                 if interval_unit == 'y':
                     years = self.interval
+
+                if create_interval_unit == 'd':
+                    create_days = self.create_interval
+                if create_interval_unit == 'm':
+                    create_months = self.create_interval
+                if create_interval_unit == 'w':
+                    create_weeks = self.create_interval
+                if create_interval_unit == 'y':
+                    create_years = self.create_interval
+
                 if base_invoice_date:
-                    next_invoice_date = datetime.strptime(str(base_invoice_date), DF).date() + relativedelta(days=days,
-                                                                                                         weeks=weeks,
-                                                                                                         months=months,
-                                                                                                         years=years)
+                    next_invoice_date = datetime.strptime(str(base_invoice_date), DF).date() + relativedelta(days=create_days,
+                                                                                                         weeks=create_weeks,
+                                                                                                         months=create_months,
+                                                                                                         years=create_years)
                 next_date_due = datetime.strptime(str(base_date_due), DF).date() + relativedelta(days=days,
                                                                                                  weeks=weeks,
                                                                                                  months=months,
                                                                                                  years=years)
                 new_inv = self.env[res_model].browse(res_id).copy(
-                    {'date_due': next_date_due, 'invoice_date': next_invoice_date})
+                    {'date_due': next_date_due, 'date_invoice': next_invoice_date})
                 new_invs.append(new_inv.id)
-                if base_invoice_date:
-                    base_invoice_date = next_invoice_date
+                # if base_invoice_date:
+                #     base_invoice_date = next_invoice_date
                 base_date_due = next_date_due
                 _logger.info("Duplicating invoice %s wtih emission date %s, %s time " % (
                     invoice.name, next_date_due, i + 1))

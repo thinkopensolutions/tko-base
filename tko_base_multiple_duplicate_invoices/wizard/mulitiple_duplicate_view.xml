@@ -9,16 +9,36 @@
             <field name="inherit_id" ref="tko_base_multiple_duplicate.multiple_duplicates_form"/>
             <field name="arch" type="xml">
                 <group name="group_name" position="after">
-                    <group name="group_name2" invisible="not context.get('active_model',False)=='account.invoice'"
-                           class="oe_inline">
-                        <label for="interval" invisible="not context.get('active_model',False)=='account.invoice'"/>
-                        <div>
-                            <field name="interval" class="oe_inline" nolabel="1"/>
-                            <field name="interval_unit" class="oe_inline" nolabel="1"/>
-                        </div>
+                    <group>
+                        <group name="group_name2" invisible="not context.get('active_model',False)=='account.invoice'"
+                               class="oe_inline">
+                            <label for="interval" invisible="not context.get('active_model',False)=='account.invoice'"/>
+                            <div>
+                                <field name="interval" class="oe_inline" nolabel="1"/>
+                                <field name="interval_unit" class="oe_inline" nolabel="1"/>
+                            </div>
+                        </group>
+                        <group name="group_name3" invisible="not context.get('active_model',False)=='account.invoice'"
+                               class="oe_inline">
+                            <label for="create_interval" invisible="not context.get('active_model',False)=='account.invoice'"/>
+                            <div>
+                                <field name="create_interval" class="oe_inline" nolabel="1"/>
+                                <field name="create_interval_unit" class="oe_inline" nolabel="1"/>
+                            </div>
+                        </group>
                     </group>
                 </group>
             </field>
         </record>
+        <!-- <record id="temp_invoice_form_inherit" model="ir.ui.view">
+            <field name="name">temp.account.invoice</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+                <button name="action_invoice_open" position="after">
+                    <button name="scheduler_duplicate_records" type="object" string="TEST"/>
+                </button>
+            </field>
+        </record> -->
     </data>
 </odoo>
