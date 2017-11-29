@@ -120,8 +120,8 @@ class multiple_duplicates(models.TransientModel):
                 new_inv = self.env[res_model].browse(res_id).copy(
                     {'date_due': next_date_due, 'date_invoice': next_invoice_date})
                 new_invs.append(new_inv.id)
-                # if base_invoice_date:
-                #     base_invoice_date = next_invoice_date
+                if base_invoice_date:
+                    base_invoice_date = next_invoice_date
                 base_date_due = next_date_due
                 _logger.info("Duplicating invoice %s wtih emission date %s, %s time " % (
                     invoice.name, next_date_due, i + 1))
